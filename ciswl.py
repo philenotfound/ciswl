@@ -22,13 +22,23 @@ except:
   debug = False
 
 eureka_wl = "http://pwl.team-eureka.com/applist.php"
-idle_appid = "00000000-0000-0000-0000-000000000000"
-f = cgi.FieldStorage()
+idle_appid = "FooBar"
 
+f = cgi.FieldStorage()
 try:
   idle_url = f["url"].value
 except:
-  idle_url = "https://www.google.at"
+  idle_url = "https://www.google.com"
+#Change idle_url to your desired URL
+
+entry = {
+  "allow_empty_post_data": True,
+  "app_id": idle_appid,
+  "dial_enabled": True,
+  "url": idle_url,
+  "use_channel": True
+}
+
 
 try:
   if(f["debug"].value == "1"):
@@ -46,19 +56,18 @@ if( not debug ):
   print("Content-Disposition: attachment; filename='apps.conf'")
   print("Content-Transfer-Encoding: binary")
 print()
-print()
-print()
 
 u = urllib2.urlopen( eureka_wl )
 
 print(urllib2.unquote(u.readline()), end='')
 
-j = json.loads(urllib2.unquote(u.readline()))
+j = json.loads(u.readline())
 
-for i in j['applications']:
-  if( i['app_id'] == idle_appid ):
-    i['url'] = idle_url
+j['applications'].insert(0,entry)
 
+j['configuration']['idle_screen_app']=idle_appid
+
+exit
 if( debug ):
   print( json.dumps( j,sort_keys=True,indent=4, separators=(',', ': ')) )
 else:
